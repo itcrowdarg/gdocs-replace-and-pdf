@@ -5,13 +5,6 @@ dotenv.config()
 const BASE_FILE_ID = '1fveIbEjAxoESW8wK00-2tAaB9XuYqo9q2YqCnUt4bTY'
 const OUTPUT_FOLDER_ID = '1kUp1FgOnwVe-FrXqDvhbft812ltfm864'
 
-// replacements which we'll map to a replacement request object
-const replacements = {
-  "{{ image1 }}": "https://mir-s3-cdn-cf.behance.net/project_modules/max_1200/1e02d099112359.5eeb5ccf7b850.jpg",
-  "{{ image2 }}": "https://mir-s3-cdn-cf.behance.net/project_modules/max_1200/1e02d099112359.5eeb5ccf7b850.jpg",
-  "{{ image3 }}": "https://mir-s3-cdn-cf.behance.net/project_modules/max_1200/1e02d099112359.5eeb5ccf7b850.jpg"
-}
-
 // initializing google's sdk - this expects there to be a GOOGLE_APPLICATION_CREDENTIALS env var pointing to a config file
 const { google } = require('googleapis')
 
@@ -43,17 +36,7 @@ async function copy() {
   return newFile.data
 }
 
-async function docReplacements(documentId) {
-  console.log('replacing text in new doc')
-  const replacementRequests = Object.entries(replacements).map(([key, value]) => ({
-    replaceAllText: {
-      containsText: {
-        text: key,
-        matchCase: true
-      },
-      replaceText: value
-    }
-  }))
+async function insertImages(documentId) {
   
   // this is not replacements per se, but rather insertions. the replacements API is pretty similar though
   var reqs = [{
@@ -134,14 +117,14 @@ async function uploadBasic(cuerpo) {
 }
 
 async function main() {
-  console.log('Copying the template');
+  console.log('--> Copying the template');
   const { id } = await copy();
-  console.log('Performing replacements');
-  await docReplacements(id);
-  console.log('Setting document\' permissions to public');
+  console.log('--> Performing replacements');
+  await insertImages(id);
+  console.log('--> Setting document\' permissions to public');
   await share(id)
   //const expo = await exportPDF(id)
-  console.log(`Success! Download the PDF here: https://docs.google.com/document/d/${id}/export?format=pdf`)
+  console.log(`--> Success! Download the PDF here: https://docs.google.com/document/d/${id}/export?format=pdf`)
 }
 
 main();
